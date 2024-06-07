@@ -11,7 +11,9 @@ function App() {
       display: "flex",
       fexDirection: "column",
       justifyContent: "center",
-      background: "green"
+      alignItems: "center",
+      background: "rgb(20, 20, 20)",
+      height: "100vh"
     }}
     >
       <Canvas />

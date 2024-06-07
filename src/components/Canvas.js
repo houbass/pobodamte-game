@@ -2,12 +2,14 @@ import React, { useEffect, useRef, useState } from "react";
 
 // IMAGES
 import map1Image from "../pictures/maps/map1.jpg";
-import characterImage from "../pictures/characters/mainChar.svg";
+import characterImage from "../pictures/characters/mainChar.png";
 import dealerCharImage from "../pictures/characters/dealerChar.svg";
 import anotherCharImage from "../pictures/characters/anotherChar.svg";
 
 export default function Canvas() {
 
+
+    const maximumHeight = 600;
     const mapWidth = 1500;
     const mapHeight = 500;
     const [canvasSize, setCanvasSize] = useState({
@@ -20,7 +22,12 @@ export default function Canvas() {
     const mainDivRef2 = useRef(null);
     const canvasRef = useRef(null);
 
-    const [clickedX, setClickedX] = useState(700);
+    const [clickedX, setClickedX] = useState({
+        x: 700,
+        transition: 0,
+        rotateY: 0,
+        class: ""
+    });
 
     const questionSet = [
         {
@@ -85,14 +92,14 @@ export default function Canvas() {
 
 
     // HORIZONTAL SCROLL
-    function scrollHorizontally() {
+    function scrollHorizontally(x) {
         const halfScreenWidth = window.innerWidth / 2;
 
 
         if (mainDivRef.current) {
-            if (x.current > halfScreenWidth) {
-                mainDivRef.current.scrollLeft = x.current - halfScreenWidth;
-                mainDivRef2.current.scrollLeft = x.current - halfScreenWidth;
+            if (x > halfScreenWidth) {
+                mainDivRef.current.scrollLeft = x - halfScreenWidth;
+                mainDivRef2.current.scrollLeft = x - halfScreenWidth;
             }
         }
     }
@@ -101,7 +108,22 @@ export default function Canvas() {
     function move(e) {
         const rect = canvasRef.current.getBoundingClientRect();
         const thisX = e.clientX - rect.left;
-        setClickedX(thisX);
+
+        const thisTransition = Math.abs(thisX - clickedX.x) / 450
+
+        let rotateY;
+        if(thisX > clickedX.x) {
+            rotateY = 0;
+        } else {
+            rotateY = 180;
+        }
+
+        setClickedX({
+            x: thisX,
+            transition: thisTransition,
+            rotateY: rotateY,
+            class: "walk-anim"
+        });
 
         setShowQuestion({
             ...showQuestion, opacity: "0",
@@ -115,7 +137,17 @@ export default function Canvas() {
 
     // SIZE CALCULATION
     function canvasSizeCalculation() {
-        const windowHeight =  window.innerHeight;
+        let windowHeight;
+        const screenHeight =  window.innerHeight;
+
+        if(screenHeight > maximumHeight) {
+            windowHeight = maximumHeight
+        } else{
+            windowHeight = screenHeight
+        }
+
+
+        
         const aspectRatio = mapWidth / mapHeight;
         const thisWidth = windowHeight * aspectRatio;
 
@@ -137,16 +169,19 @@ export default function Canvas() {
         // animation function
         const render = () => {
 
-            const thisWindowHeight = window.innerHeight;
+            
 
             // animation request
             timerIdHolder.timerId = window.requestAnimationFrame(render);
 
-            if (clickedX > x.current + 10) {
-                x.current += thisWindowHeight / 80;
-            } else if (clickedX < x.current - 10) {
-                x.current -= thisWindowHeight / 80;;
+            // SCROLL X MOVING
+            if (clickedX.x > x.current + 10) {
+                x.current += canvasSize.height / 80;
+            } else if (clickedX.x < x.current - 10) {
+                x.current -= canvasSize.height / 80;;
             }
+            scrollHorizontally(x.current);
+            
 
             // canvas shape
             context.clearRect(0, 0, canvas.width, canvas.height);
@@ -156,17 +191,32 @@ export default function Canvas() {
 
 
             // draw character
-            context.drawImage(character, x.current - 65, thisWindowHeight * 0.75, thisWindowHeight / 5, thisWindowHeight / 5);
+            //context.drawImage(character, x.current - 65, canvasSize.height * 0.75, canvasSize.height / 5, canvasSize.height / 5);
 
 
 
-            scrollHorizontally();
+            
         };
         render();
 
         // animation cancel
         return () => cancelAnimationFrame(timerIdHolder.timerId);
-    }, [clickedX]);
+    }, [clickedX.x]);
+
+
+    // WALKING CLASS HANDLER
+    useEffect(() => {
+        const timeout = setTimeout(() => {
+            setClickedX({
+                ...clickedX,
+                class: ""
+            })
+        }, clickedX.transition * 1000)
+
+        return() => {
+            clearTimeout(timeout);
+        }
+    }, [clickedX.x])
 
 
     // canvas size calculation
@@ -175,8 +225,7 @@ export default function Canvas() {
     }, [])
 
 
-    console.log("----------")
-    console.log(showQuestion)
+
 
     return (
         <div
@@ -185,7 +234,7 @@ export default function Canvas() {
             //display: "flex",
             overflowX: "hidden",
             position: "relative",
-            background: "blue"
+            //background: "blue"
         }}
         >
             <div
@@ -208,52 +257,83 @@ export default function Canvas() {
 
 
             <img 
-                onClick={() => {
-                    setShowQuestion({
-                        opacity: "1",
-                        questions: [questionSet[0], questionSet[1]]
-                    });
+            className="prevent-select"
+            onClick={() => {
+                setShowQuestion({
+                    opacity: "1",
+                    questions: [questionSet[0], questionSet[1]]
+                });
 
-                    setShowAnswer({
-                        opacity: "0",
-                        text: ""
-                    })
-                }}
-                src={dealerCharImage}
-                width={canvasSize.height * 0.2}
-                height="auto"
-                style={{
-                    position: "absolute",
-                    zIndex: "10",
-                    top: "75%",
-                    left: "10%",
-                    cursor: "pointer"
-                }}
+                setShowAnswer({
+                    opacity: "0",
+                    text: ""
+                })
+            }}
+            src={dealerCharImage}
+            width={canvasSize.height * 0.2}
+            height="auto"
+            style={{
+                position: "absolute",
+                zIndex: "10",
+                bottom: "5%",
+                left: "10%",
+                cursor: "pointer"
+            }}
             />
 
             <img 
+            className="prevent-select"
             src={anotherCharImage}
             width={canvasSize.height * 0.2}
             height="auto"
             style={{
                 position: "absolute",
                 zIndex: "10",
-                top: "75%",
+                bottom: "5%",
                 left: canvasSize.width * 0.9 + "px",
                 cursor: "pointer"
             }}
             />
+
+
+
+
+
+
+
+            <div 
+            style={{
+                //background: "orange",
+                transform: "rotateY(" + clickedX.rotateY + "deg)",
+                position: "absolute",
+                zIndex: "10",
+                bottom: "5%",
+                left: clickedX.x,
+                transition: "left " + clickedX.transition + "s linear",
+            }}
+            >
+                <img 
+                className={"prevent-select " + clickedX.class}
+                src={characterImage}
+                width={canvasSize.height * 0.2}
+                height="auto"
+                />
+            </div>
+
+
+
+
 
             <div
             style={{
                 position: "absolute",
                 display: "flex",
                 flexDirection: "column",
-                width: "200px",
+                //width: "200px",
                 gap: "5px",
                 zIndex: "10",
-                top: "50%",
-                left: x.current - 20 + "px",
+                bottom: "35%",
+                left: x.current + 30 + "px",
                 background: "white",
                 padding: "10px",
                 borderRadius: "8px",
@@ -278,7 +358,7 @@ export default function Canvas() {
                             if(item.continue === true) {
                                 setShowQuestion({
                                     ...showQuestion,
-                                    questions: item.next.map((e, i) => questionSet.filter((el) => el.index === e))[0]
+                                    questions: item.next.map((e, i) => questionSet.filter((el) => el.index === e)[0])
                                 })
                             } else {
                                 setShowQuestion({
@@ -298,10 +378,10 @@ export default function Canvas() {
                 position: "absolute",
                 display: "flex",
                 flexDirection: "column",
-                minWidth: "200px",
+                //minWidth: "200px",
                 gap: "5px",
                 zIndex: "10",
-                top: "50%",
+                bottom: "27%",
                 left: "10%",
                 transform: "translate(50px, 0)",
                 background: "white",
