@@ -1,12 +1,8 @@
 * {
   margin: 0;
   padding: 0;
+  
 }
-
-
-
-
-
 
 .prevent-select {
   -webkit-user-select: none; /* Safari */
@@ -16,7 +12,7 @@
 
 
 .question {
-  font-size: 18px;
+  font-size: 0.8rem;
   font-weight: 600;
   cursor: pointer;
   padding: 5px;
@@ -27,7 +23,7 @@
 }
 
 .answer {
-  font-size: 18px;
+  font-size: 0.8rem;
   font-weight: 600;
   padding: 5px;
 }

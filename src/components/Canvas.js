@@ -1,13 +1,12 @@
 import React, { useEffect, useRef, useState } from "react";
 
 // IMAGES
-import map1Image from "../pictures/maps/map1.jpg";
+import map1Image from "../pictures/maps/map1.png";
 import characterImage from "../pictures/characters/mainChar.png";
-import dealerCharImage from "../pictures/characters/dealerChar.svg";
-import anotherCharImage from "../pictures/characters/anotherChar.svg";
+import dealerCharImage from "../pictures/characters/dealerChar.png";
+
 
 export default function Canvas() {
-
 
     const maximumHeight = 600;
     const mapWidth = 1500;
@@ -277,27 +276,9 @@ export default function Canvas() {
                 zIndex: "10",
                 bottom: "5%",
                 left: "10%",
-                cursor: "pointer"
+                cursor: "pointer",
             }}
             />
-
-            <img 
-            className="prevent-select"
-            src={anotherCharImage}
-            width={canvasSize.height * 0.2}
-            height="auto"
-            style={{
-                position: "absolute",
-                zIndex: "10",
-                bottom: "5%",
-                left: canvasSize.width * 0.9 + "px",
-                cursor: "pointer"
-            }}
-            />
-
-
-
-
 
 
 
@@ -329,7 +310,7 @@ export default function Canvas() {
                 position: "absolute",
                 display: "flex",
                 flexDirection: "column",
-                //width: "200px",
+                minWidth: "100px",
                 gap: "5px",
                 zIndex: "10",
                 bottom: "35%",
@@ -378,7 +359,7 @@ export default function Canvas() {
                 position: "absolute",
                 display: "flex",
                 flexDirection: "column",
-                //minWidth: "200px",
+                minWidth: "100px",
                 gap: "5px",
                 zIndex: "10",
                 bottom: "27%",
